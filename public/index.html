@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giám sát cháy nổ - Chợ dân sinh</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* Existing styles remain unchanged */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: white;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(90deg, #d32f2f, #ff4d4d);
+      color: white;
+      padding: 1.5em;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .node-selector {
+      text-align: center;
+      padding: 1.5em;
+      background: white;
+      margin: 1em;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .node-selector button {
+      background: linear-gradient(45deg, #d32f2f, #ff4d4d);
+      color: white;
+      border: none;
+      padding: 0.8em 1.5em;
+      margin: 0 0.5em;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .node-selector button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: 0.5s;
+    }
+
+    .node-selector button:hover::before {
+      left: 100%;
+    }
+
+    .node-selector button.active {
+      background: linear-gradient(45deg, #b71c1c, #d32f2f);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(183, 28, 28, 0.4);
+    }
+
+    .node-selector button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 77, 77, 0.4);
+    }
+
+    .node-label {
+      text-align: center;
+      margin: 1em 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #d32f2f;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .switch-wrapper {
+      text-align: center;
+      margin: 1em 0;
+      background: white;
+      padding: 1em;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1em;
+    }
+
+    .switch-label {
+      font-size: 1.1rem;
+      color: #333;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .control-buttons {
+      display: contents;
+      gap: 0.5em;
+    }
+
+    .control-buttons button {
+      background: linear-gradient(45deg, #d32f2f, #ff4d4d);
+      color: white;
+      border: none;
+      padding: 0.6em 1.2em;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    .control-buttons button.on {
+      background: linear-gradient(45deg, #24d393, #4bc0c0);
+    }
+
+    .control-buttons button.off {
+      background: linear-gradient(45deg, #b71c1c, #d32f2f);
+    }
+
+    .control-buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 77, 77, 0.4);
+    }
+
+    .control-buttons button.on:hover {
+      box-shadow: 0 4px 8px rgba(36, 211, 147, 0.4);
+    }
+
+    .switch-wrapper button {
+      background: linear-gradient(45deg, #d32f2f, #ff4d4d);
+      color: white;
+      border: none;
+      padding: 0.6em 1.2em;
+      margin-left: 1em;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      vertical-align: middle;
+    }
+
+    .switch-wrapper button:hover {
+      background: linear-gradient(45deg, #ff4d4d, #ff6666);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 77, 77, 0.4);
+    }
+
+    .dashboard {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      padding: 2em;
+      overflow-x: auto;
+      gap: 4.5em;
+      background: white;
+      margin: 1em;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+      background: linear-gradient(145deg, #ffffff, #f0f0f0);
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      width: 220px;
+      padding: 1.2em;
+      text-align: center;
+      flex-shrink: 0;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: fadeInCard 0.5s ease-out;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .card.danger {
+      background: linear-gradient(145deg, #ffe6e6, #ffd6d6);
+      box-shadow: 0 6px 12px rgba(183, 28, 28, 0.3);
+      animation: pulse 1s infinite;
+    }
+
+    .card i {
+      font-size: 2.2rem;
+      margin-bottom: 0.6rem;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover i {
+      transform: scale(1.1);
+    }
+
+    .card.danger i {
+      color: #b71c1c;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0.5rem 0;
+      color: #333;
+    }
+
+    .card p {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .card.temperature p,
+    .card.temperature:not(.danger) i {
+      color: #2196f3;
+    }
+
+    .card.smoke p,
+    .card.smoke:not(.danger) i {
+      color: #4bc0c0;
+    }
+
+    .card.flame p,
+    .card.flame:not(.danger) i {
+      color: #ffce56;
+    }
+
+    .card.humidity p,
+    .card.humidity:not(.danger) i {
+      color: #24d393;
+    }
+
+    #chart-container {
+      margin: 2em;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      background: white;
+      padding: 1.5em;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-out;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      border-radius: 8px;
+    }
+
+    .alert-banner {
+      display: none;
+      background: linear-gradient(90deg, #b71c1c, #d32f2f);
+      color: white;
+      padding: 1.2em;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      animation: slideDown 0.5s ease-in;
+    }
+
+    .alert-banner p {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .alert-banner button {
+      background: white;
+      color: #b71c1c;
+      border: none;
+      padding: 0.6em 1.2em;
+      margin-left: 1em;
+      cursor: pointer;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .alert-banner button:hover {
+      background: #f0f0f0;
+      transform: translateY(-2px);
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .loading-spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #d32f2f;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInCard {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.03);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .node-selector button {
+        padding: 0.6em 1em;
+        font-size: 0.9rem;
+      }
+
+      .card {
+        width: 180px;
+        padding: 1em;
+      }
+
+      .card i {
+        font-size: 1.8rem;
+      }
+
+      .card p {
+        font-size: 1.1rem;
+      }
+
+      .switch-wrapper {
+        padding: 0.8em;
+      }
+
+      .switch-label {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+  <div class="alert-banner" id="alertBanner">
+    <p id="alertMessage"></p>
+    <button onclick="dismissAlert()">Đóng</button>
+  </div>
+  <header>
+    <h1>Hệ thống giám sát cháy nổ - Chợ dân sinh</h1>
+  </header>
+  <div class="node-selector">
+    <button id="node1-btn" class="active">Khu vực 1</button>
+    <button id="node2-btn">Khu vực 2</button>
+    <button id="export-btn">Xuất dữ liệu Excel</button>
+  </div>
+  <div class="node-label" id="node-label">Đang xem: Khu vực 1</div>
+  <div class="switch-wrapper" id="switch-node1">
+    <span class="switch-label">Phun sương Khu vực 1:</span>
+    <div class="control-buttons">
+      <button class="on" onclick="sendControlCommand('Node1:led on')">ON</button>
+      <button class="off" onclick="sendControlCommand('Node1:led off')">OFF</button>
+    </div>
+    <button onclick="sendControlCommand('Node1:auto')">Chế độ tự động</button>
+  </div>
+  <div class="switch-wrapper" id="switch-node1-bom">
+    <span class="switch-label">Máy bơm Khu vực 1:</span>
+    <div class="control-buttons">
+      <button class="on" onclick="sendControlCommand('Node1:bom on')">ON</button>
+      <button class="off" onclick="sendControlCommand('Node1:bom off')">OFF</button>
+    </div>
+  </div>
+  <div class="switch-wrapper" id="switch-node2" style="display: none;">
+    <span class="switch-label">Phun sương Khu vực 2:</span>
+    <div class="control-buttons">
+      <button class="on" onclick="sendControlCommand('Node2:led on')">ON</button>
+      <button class="off" onclick="sendControlCommand('Node2:led off')">OFF</button>
+    </div>
+    <button onclick="sendControlCommand('Node2:auto')">Chế độ tự động</button>
+  </div>
+  <div class="switch-wrapper" id="switch-node2-bom" style="display: none;">
+    <span class="switch-label">Máy bơm Khu vực 2:</span>
+    <div class="control-buttons">
+      <button class="on" onclick="sendControlCommand('Node2:bom on')">ON</button>
+      <button class="off" onclick="sendControlCommand('Node2:bom off')">OFF</button>
+    </div>
+  </div>
+  <section class="dashboard" id="sensor-cards"></section>
+  <section id="chart-container">
+    <canvas id="sensorChart" width="400" height="200"></canvas>
+  </section>
+  <audio id="alertSound" src="https://jumpshare.com/s/RzIHaf43CHcByBZSYp2J"></audio>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    // Dữ liệu khởi tạo cho Node 1 và Node 2
+    const sensorsNode1 = [
+      { id: 1, name: 'Temperature', value: 0, unit: '°C', danger: false, icon: 'fa-thermometer-half', class: 'temperature' },
+      { id: 2, name: 'MQ-2', value: 0, unit: 'ppm', danger: false, icon: 'fa-smog', class: 'smoke' },
+      { id: 3, name: 'Sensor Flame', value: 0, unit: '', danger: false, icon: 'fa-fire', class: 'flame' },
+      { id: 4, name: 'Humidity', value: 0, unit: '%', danger: false, icon: 'fa-tint', class: 'humidity' }
+    ];
+    const sensorsNode2 = [
+      { id: 1, name: 'Temperature', value: 0, unit: '°C', danger: false, icon: 'fa-thermometer-half', class: 'temperature' },
+      { id: 2, name: 'MQ-2', value: 0, unit: 'ppm', danger: false, icon: 'fa-smog', class: 'smoke' },
+      { id: 3, name: 'Sensor Flame', value: 0, unit: '', danger: false, icon: 'fa-fire', class: 'flame' },
+      { id: 4, name: 'Humidity', value: 0, unit: '%', danger: false, icon: 'fa-tint', class: 'humidity' }
+    ];
+    let currentNode = 'node1';
+    let currentSensors = sensorsNode1;
+    const cardsContainer = document.getElementById('sensor-cards');
+    const node1Btn = document.getElementById('node1-btn');
+    const node2Btn = document.getElementById('node2-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const nodeLabel = document.getElementById('node-label');
+    const switchNode1 = document.getElementById('switch-node1');
+    const switchNode1Bom = document.getElementById('switch-node1-bom');
+    const switchNode2 = document.getElementById('switch-node2');
+    const switchNode2Bom = document.getElementById('switch-node2-bom');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const alertBanner = document.getElementById('alertBanner');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertSound = document.getElementById('alertSound');
+    let lastAlertTime = 0;
+    const alertCooldown = 10000; // 10 giây chờ giữa các cảnh báo
+
+    // Lưu trữ dữ liệu biểu đồ cho từng node
+    const chartDataNode1 = {
+      labels: [],
+      datasets: [
+        {
+          label: 'Temperature (°C)',
+          data: [],
+          backgroundColor: 'rgba(33, 150, 243, 0.2)',
+          borderColor: 'rgba(33, 150, 243, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'MQ-2 (ppm)',
+          data: [],
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'Flame (analog)',
+          data: [],
+          backgroundColor: 'rgba(255, 206, 86, 0.2)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'Humidity (%)',
+          data: [],
+          backgroundColor: 'rgba(36, 211, 147, 0.2)',
+          borderColor: 'rgba(36, 211, 147, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }
+      ]
+    };
+    const chartDataNode2 = {
+      labels: [],
+      datasets: [
+        {
+          label: 'Temperature (°C)',
+          data: [],
+          backgroundColor: 'rgba(33, 150, 243, 0.2)',
+          borderColor: 'rgba(33, 150, 243, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'MQ-2 (ppm)',
+          data: [],
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'Flame (analog)',
+          data: [],
+          backgroundColor: 'rgba(255, 206, 86, 0.2)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        },
+        {
+          label: 'Humidity (%)',
+          data: [],
+          backgroundColor: 'rgba(36, 211, 147, 0.2)',
+          borderColor: 'rgba(36, 211, 147, 1)',
+          borderWidth: 2,
+          fill: false,
+          pointStyle: 'circle',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }
+      ]
+    };
+
+    // Yêu cầu quyền thông báo
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+
+    // Hàm hiển thị thông báo trình duyệt
+    function showNotification(message) {
+      if (Notification.permission === 'granted') {
+        new Notification('Cảnh báo cháy nổ', {
+          body: message,
+          icon: 'https://img.icons8.com/color/48/000000/fire.png'
+        });
+      }
+    }
+
+    // Hàm hiển thị cảnh báo
+    function triggerAlert(message) {
+      const now = Date.now();
+      if (now - lastAlertTime < alertCooldown) return;
+      lastAlertTime = now;
+      alertMessage.textContent = message;
+      alertBanner.style.display = 'block';
+      alertSound.play().catch(error => console.error('Lỗi phát âm thanh:', error));
+      showNotification(message);
+      // Thêm hiệu ứng rung nhẹ cho banner
+      alertBanner.animate([
+        { transform: 'translateX(-5px)' },
+        { transform: 'translateX(5px)' },
+        { transform: 'translateX(0)' }
+      ], {
+        duration: 300,
+        iterations: 2
+      });
+    }
+
+    // Hàm đóng cảnh báo
+    function dismissAlert() {
+      alertBanner.style.display = 'none';
+    }
+
+    // Hàm gửi lệnh điều khiển đến server
+    async function sendControlCommand(command) {
+      try {
+        const response = await fetch('http://192.168.1.225:3000/api/control', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log('Lệnh gửi thành công:', result);
+      } catch (error) {
+        console.error('Lỗi khi gửi lệnh:', error);
+        triggerAlert(`Không thể gửi lệnh điều khiển: ${command}!`);
+      }
+    }
+
+    // Xử lý sự kiện nút ON/OFF phun sương
+    document.querySelectorAll('.control-buttons .on, .control-buttons .off').forEach(button => {
+      button.addEventListener('click', () => {
+        const node = button.closest('.switch-wrapper').id.includes('node1') ? 'Node1' : 'Node2';
+        const isBom = button.closest('.switch-wrapper').id.includes('bom');
+        const command = `${node}:${isBom ? 'bom' : 'led'} ${button.classList.contains('on') ? 'on' : 'off'}`;
+        sendControlCommand(command);
+
+        // Cập nhật trạng thái nút
+        const buttons = button.parentElement.querySelectorAll('button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+      });
+    });
+
+    // Hàm khởi tạo thẻ cảm biến
+    function initializeCards(sensors) {
+      cardsContainer.innerHTML = '';
+      sensors.forEach(sensor => {
+        const card = document.createElement('div');
+        card.className = `card ${sensor.class}` + (sensor.danger ? ' danger' : '');
+        card.dataset.sensorId = sensor.id;
+        let displayValue = `${sensor.value} ${sensor.unit}`;
+        card.innerHTML = `
+          <i class="fas ${sensor.icon}"></i>
+          <h3>${sensor.name}</h3>
+          <p><strong>${displayValue}</strong></p>
+        `;
+        cardsContainer.appendChild(card);
+        // Thêm hiệu ứng xuất hiện
+        card.animate([
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ], {
+          duration: 500,
+          easing: 'ease-out',
+          fill: 'forwards'
+        });
+      });
+    }
+
+    // Hàm cập nhật thẻ cảm biến
+    function updateCards(sensors) {
+      const cards = cardsContainer.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        const sensor = sensors[index];
+        const displayValue = `${sensor.value} ${sensor.unit}`;
+        card.className = `card ${sensor.class}` + (sensor.danger ? ' danger' : '');
+        card.querySelector('p').innerHTML = `<strong>${displayValue}</strong>`;
+        const icon = card.querySelector('i');
+        icon.className = `fas ${sensor.icon}`;
+        // Thêm hiệu ứng khi giá trị thay đổi
+        if (card.dataset.lastValue !== displayValue) {
+          card.animate([
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.05)' },
+            { transform: 'scale(1)' }
+          ], {
+            duration: 300,
+            easing: 'ease-in-out'
+          });
+          card.dataset.lastValue = displayValue;
+        }
+      });
+    }
+
+    // Real-time time label
+    function getCurrentTimeLabel() {
+      const now = new Date();
+      return now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    // Cấu hình biểu đồ
+    const ctx = document.getElementById('sensorChart').getContext('2d');
+    const sensorChart = new Chart(ctx, {
+      type: 'line',
+      data: chartDataNode1,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: { size: 14, weight: '600' },
+              padding: 20,
+              usePointStyle: true
+            }
+          },
+          title: {
+            display: true,
+            text: 'Dữ liệu Khu vực 1',
+            font: { size: 18, weight: '700' },
+            color: '#d32f2f',
+            padding: { top: 10, bottom: 20 }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleFont: { size: 14, weight: '600' },
+            bodyFont: { size: 12 },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function (context) {
+                let label = context.dataset.label || '';
+                if (label.includes('Flame')) {
+                  return `${label}: ${context.parsed.y} (Nguy hiểm: ${context.parsed.y < 200 ? 'Có' : 'Không'})`;
+                }
+                if (label.includes('Humidity')) {
+                  return `${label}: ${context.parsed.y} (Nguy hiểm: ${context.parsed.y > 80 ? 'Có' : 'Không'})`;
+                }
+                return `${label}: ${context.parsed.y}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 1200,
+            title: { display: true, text: 'Giá trị cảm biến', font: { size: 14, weight: '600' } },
+            grid: { color: 'rgba(0, 0, 0, 0.1)' }
+          },
+          x: {
+            title: { display: true, text: 'Thời gian', font: { size: 14, weight: '600' } },
+            grid: { display: false }
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
+
+    // Hàm lấy dữ liệu từ API
+    async function fetchSensorData(node) {
+      try {
+        const response = await fetch(`http://192.168.1.225:3000/api/sensors/${node}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(`Dữ liệu từ ${node}:`, data);
+        return data;
+      } catch (error) {
+        console.error(`Lỗi khi lấy dữ liệu từ ${node}:`, error);
+        return [];
+      }
+    }
+
+    // Hàm lấy tất cả dữ liệu từ cả hai node
+    async function fetchAllSensorData() {
+      try {
+        const response = await fetch('http://192.168.1.225:3000/api/sensors/all');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Dữ liệu từ cả hai node:', data);
+        return data;
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu từ cả hai node:', error);
+        triggerAlert('Không thể lấy dữ liệu để xuất Excel!');
+        return null;
+      }
+    }
+
+    // Hàm xuất dữ liệu ra Excel
+    async function exportToExcel() {
+      loadingOverlay.style.display = 'flex';
+      const data = await fetchAllSensorData();
+      if (!data) {
+        loadingOverlay.style.display = 'none';
+        return;
+      }
+
+      // Chuẩn bị dữ liệu cho Node1
+      const node1Data = data.node1.map(row => ({
+        ID: row.id,
+        'Nhiệt độ (°C)': row.temp,
+        'MQ-2 (ppm)': row.mq2,
+        'Ngọn lửa (analog)': row.flame,
+        'Độ ẩm (%)': row.hum,
+        'Thời gian': new Date(row.timestamp).toLocaleString('vi-VN'),
+        'Phun sương': row.relay,
+        'Máy bơm': row.relay2
+      }));
+
+      // Chuẩn bị dữ liệu cho Node2
+      const node2Data = data.node2.map(row => ({
+        ID: row.id,
+        'Nhiệt độ (°C)': row.temp,
+        'MQ-2 (ppm)': row.mq2,
+        'Ngọn lửa (analog)': row.flame,
+        'Độ ẩm (%)': row.hum,
+        'Thời gian': new Date(row.timestamp).toLocaleString('vi-VN'),
+        'Phun sương': row.relay,
+        'Máy bơm': row.relay2
+      }));
+
+      // Tạo workbook và worksheets
+      const wb = XLSX.utils.book_new();
+      const wsNode1 = XLSX.utils.json_to_sheet(node1Data);
+      const wsNode2 = XLSX.utils.json_to_sheet(node2Data);
+
+      // Thêm các sheet vào workbook
+      XLSX.utils.book_append_sheet(wb, wsNode1, 'Khu vực 1');
+      XLSX.utils.book_append_sheet(wb, wsNode2, 'Khu vực 2');
+
+      // Tạo tên file với thời gian
+      const now = new Date();
+      const fileName = `SensorData_${now.toLocaleString('vi-VN', { hour12: false }).replace(/[:/]/g, '-')}.xlsx`;
+
+      // Xuất file
+      XLSX.writeFile(wb, fileName);
+      loadingOverlay.style.display = 'none';
+      triggerAlert('Xuất dữ liệu Excel thành công!');
+    }
+
+    // Sự kiện nút xuất Excel
+    exportBtn.addEventListener('click', exportToExcel);
+
+    // Hàm kiểm tra và kích hoạt cảnh báo
+    function checkAndTriggerAlerts(node, sensors) {
+      let alertMessage = '';
+      if (sensors[0].value > 40) {
+        alertMessage += `Cảnh báo: Nhiệt độ cao (${sensors[0].value}°C) tại ${node === 'node1' ? 'Khu vực 1' : 'Khu vực 2'}! `;
+      }
+      if (sensors[1].value > 500) {
+        alertMessage += `Cảnh báo: Nồng độ khói cao (${sensors[1].value}ppm) tại ${node === 'node1' ? 'Khu vực 1' : 'Khu vực 2'}! `;
+      }
+      if (sensors[2].value < 200) {
+        alertMessage += `Cảnh báo: Phát hiện ngọn lửa tại ${node === 'node1' ? 'Khu vực 1' : 'Khu vực 2'}! `;
+      }
+      if (sensors[3].value > 100) {
+        alertMessage += `Cảnh báo: Độ ẩm cao (${sensors[3].value}%) tại ${node === 'node1' ? 'Khu vực 1' : 'Khu vực 2'}! `;
+      }
+      if (alertMessage) {
+        triggerAlert(alertMessage);
+      }
+    }
+
+    // Hàm cập nhật dữ liệu cảm biến và biểu đồ
+    function updateSensorData(node, sensors, chartData) {
+      fetchSensorData(node).then(data => {
+        if (data && data.length > 0) {
+          const latestData = data[0];
+          sensors[0].value = latestData.temp || sensors[0].value;
+          sensors[0].danger = sensors[0].value > 40;
+          sensors[1].value = latestData.mq2 || sensors[1].value;
+          sensors[1].danger = sensors[1].value > 500;
+          sensors[2].value = latestData.flame || sensors[2].value;
+          sensors[2].danger = sensors[2].value < 200;
+          sensors[3].value = latestData.hum || sensors[3].value;
+          sensors[3].danger = sensors[3].value > 100;
+          // Cập nhật trạng thái nút
+          if (node === 'node1') {
+            const mistButtons = switchNode1.querySelectorAll('.control-buttons button');
+            mistButtons.forEach(btn => btn.classList.remove('active'));
+            switchNode1.querySelector(latestData.relay === 'on' ? '.on' : '.off').classList.add('active');
+            const bomButtons = switchNode1Bom.querySelectorAll('.control-buttons button');
+            bomButtons.forEach(btn => btn.classList.remove('active'));
+            switchNode1Bom.querySelector(latestData.relay2 === 'on' ? '.on' : '.off').classList.add('active');
+          } else {
+            const mistButtons = switchNode2.querySelectorAll('.control-buttons button');
+            mistButtons.forEach(btn => btn.classList.remove('active'));
+            switchNode2.querySelector(latestData.relay === 'on' ? '.on' : '.off').classList.add('active');
+            const bomButtons = switchNode2Bom.querySelectorAll('.control-buttons button');
+            bomButtons.forEach(btn => btn.classList.remove('active'));
+            switchNode2Bom.querySelector(latestData.relay2 === 'on' ? '.on' : '.off').classList.add('active');
+          }
+          // Kiểm tra cảnh báo
+          checkAndTriggerAlerts(node, sensors);
+          // Cập nhật dữ liệu biểu đồ
+          const now = getCurrentTimeLabel();
+          if (chartData.labels.length >= 10) {
+            chartData.labels.shift();
+            chartData.datasets.forEach(dataset => dataset.data.shift());
+          }
+          chartData.labels.push(now);
+          chartData.datasets[0].data.push(sensors[0].value); // Temperature
+          chartData.datasets[1].data.push(sensors[1].value); // MQ-2
+          chartData.datasets[2].data.push(sensors[2].value); // Flame
+          chartData.datasets[3].data.push(sensors[3].value); // Humidity
+          // Cập nhật giao diện nếu là node hiện tại
+          if (node === currentNode) {
+            updateCards(sensors);
+            sensorChart.data = chartData;
+            sensorChart.update();
+          }
+        }
+      });
+    }
+
+    // Hàm chuyển đổi node
+    function switchNode(node) {
+      loadingOverlay.style.display = 'flex';
+      setTimeout(() => {
+        currentNode = node;
+        currentSensors = node === 'node1' ? sensorsNode1 : sensorsNode2;
+        const chartData = node === 'node1' ? chartDataNode1 : chartDataNode2;
+        node1Btn.classList.toggle('active', node === 'node1');
+        node2Btn.classList.toggle('active', node === 'node2');
+        nodeLabel.textContent = `Đang xem: ${node === 'node1' ? 'Khu vực 1' : 'Khu vực 2'}`;
+        // Hiển thị/ẩn công tắc tương ứng
+        switchNode1.style.display = node === 'node1' ? 'block' : 'none';
+        switchNode1Bom.style.display = node === 'node1' ? 'block' : 'none';
+        switchNode2.style.display = node === 'node2' ? 'block' : 'none';
+        switchNode2Bom.style.display = node === 'node2' ? 'block' : 'none';
+        initializeCards(currentSensors);
+        sensorChart.data = chartData;
+        sensorChart.options.plugins.title.text = `Dữ liệu ${node === 'node1' ? 'Khu vực 1' : 'Khu vực 2'}`;
+        sensorChart.update();
+        updateSensorData(node, currentSensors, chartData);
+        loadingOverlay.style.display = 'none';
+      }, 500);
+    }
+
+    // Sự kiện nút chọn node
+    node1Btn.addEventListener('click', () => switchNode('node1'));
+    node2Btn.addEventListener('click', () => switchNode('node2'));
+
+    // Khởi tạo thẻ cảm biến cho Node 1 khi tải trang
+    initializeCards(sensorsNode1);
+
+    // Cập nhật dữ liệu định kỳ
+    setInterval(() => {
+      updateSensorData('node1', sensorsNode1, chartDataNode1);
+      updateSensorData('node2', sensorsNode2, chartDataNode2);
+    }, 2000);
+
+    // Lấy dữ liệu lần đầu
+    updateSensorData('node1', sensorsNode1, chartDataNode1);
+
+    // Thêm hiệu ứng cho chart khi tải
+    sensorChart.canvas.animate([
+      { opacity: 0, transform: 'scale(0.95)' },
+      { opacity: 1, transform: 'scale(1)' }
+    ], {
+      duration: 1000,
+      easing: 'ease-out'
+    });
+  </script>
+</body>
+
+</html>
